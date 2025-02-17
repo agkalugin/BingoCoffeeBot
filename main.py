@@ -9,7 +9,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 # Получаем токен из переменной окружения
 TOKEN = os.getenv("TOKEN")
-ADMIN_ID = os.getenv("ADMIN_ID")  # Добавь сюда ID админа
+ADMIN_ID = 68189  # ID твоего аккаунта
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,19 +58,19 @@ async def process_phone_number(message: types.Message, state: FSMContext, phone_
     
     # Отправка данных админу
     admin_message = (
-        f"Новая регистрация в программе лояльности:\n"
-        f"ФИО: {full_name}\n"
-        f"Телефон: {phone_number}\n"
-        f"Последние 4 цифры: {last_four_digits}"
+        f"🔔 **Новая регистрация в программе лояльности:**\n"
+        f"👤 **ФИО:** {full_name}\n"
+        f"📞 **Телефон:** {phone_number}\n"
+        f"🔢 **Последние 4 цифры:** {last_four_digits}"
     )
     try:
-        if ADMIN_ID:
-            await bot.send_message(ADMIN_ID, admin_message)  # Отправка по chat_id
+        await bot.send_message(ADMIN_ID, admin_message)  # Отправка админу по chat_id
+        await bot.send_message("@kalugin", admin_message)  # Отправка в @kalugin
     except Exception as e:
         logging.error(f"Ошибка отправки данных админу: {e}")
     
     # Ответ пользователю
-    await message.answer(f"Регистрация завершена!\nПри покупке называйте последние 4 цифры вашего номера: {last_four_digits}")
+    await message.answer(f"✅ **Регистрация завершена!**\n📢 **При покупке называйте последние 4 цифры:** `{last_four_digits}`")
     await state.finish()
 
 if __name__ == "__main__":
