@@ -7,9 +7,16 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-# Получаем токен из переменной окружения
+# Получение токена из переменных окружения Heroku
 TOKEN = os.getenv("TOKEN")
-ADMIN_ID = 68189  # ID твоего аккаунта
+
+# ID и Username администратора
+ADMIN_ID = 68189
+ADMIN_USERNAME = "@kalugin"
+
+# Проверка токена
+if not TOKEN:
+    raise ValueError("Ошибка: Токен бота не найден в переменных окружения!")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -56,21 +63,28 @@ async def process_phone_number(message: types.Message, state: FSMContext, phone_
     full_name = data.get("full_name")
     last_four_digits = phone_number[-4:] if len(phone_number) >= 4 else phone_number
     
-    # Отправка данных админу
     admin_message = (
-        f"🔔 **Новая регистрация в программе лояльности:**\n"
-        f"👤 **ФИО:** {full_name}\n"
-        f"📞 **Телефон:** {phone_number}\n"
-        f"🔢 **Последние 4 цифры:** {last_four_digits}"
+        f"🆕 *Новая регистрация в программе лояльности:*\n"
+        f"👤 *ФИО:* {full_name}\n"
+        f"📞 *Телефон:* {phone_number}\n"
+        f"🔢 *Последние 4 цифры:* {last_four_digits}"
     )
+
     try:
-        await bot.send_message(ADMIN_ID, admin_message)  # Отправка админу по chat_id
-        await bot.send_message("@kalugin", admin_message)  # Отправка в @kalugin
+        # Отправка админу по ID
+        await bot.send_message(ADMIN_ID, admin_message, parse_mode="Markdown")
+
+        # Дублирование сообщения по Username
+        await bot.send_message(ADMIN_USERNAME, admin_message, parse_mode="Markdown")
     except Exception as e:
         logging.error(f"Ошибка отправки данных админу: {e}")
-    
+
     # Ответ пользователю
-    await message.answer(f"✅ **Регистрация завершена!**\n📢 **При покупке называйте последние 4 цифры:** `{last_four_digits}`")
+    await message.answer(
+        f"✅ *Регистрация завершена!*\n"
+        f"При покупке называйте последние 4 цифры вашего номера: `{last_four_digits}`",
+        parse_mode="Markdown"
+    )
     await state.finish()
 
 if __name__ == "__main__":
