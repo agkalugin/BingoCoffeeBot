@@ -1,3 +1,4 @@
+import os
 import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
@@ -6,9 +7,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-# Замените на ваш токен бота
-TOKEN = "YOUR_BOT_TOKEN"
-ADMIN_USERNAME = "bingo_vape"  # Telegram-аккаунт, куда будут отправляться данные
+# Получаем токен из переменной окружения
+TOKEN = os.getenv("TOKEN")
+ADMIN_ID = os.getenv("ADMIN_ID")  # Добавь сюда ID админа
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +30,8 @@ async def start(message: types.Message):
         "Привет! Этот бот создан для подключения к программе лояльности Bingo Coffee.\n"
         "С каждой покупки вам будет возвращаться от 2 до 5% на бонусный счёт.\n"
         "За регистрацию вам начисляется 100 рублей!\n\n"
-        "Пожалуйста, введите ваше ФИО:")
+        "Пожалуйста, введите ваше ФИО:"
+    )
     await message.answer(welcome_text)
     await Registration.full_name.set()
 
@@ -62,7 +64,8 @@ async def process_phone_number(message: types.Message, state: FSMContext, phone_
         f"Последние 4 цифры: {last_four_digits}"
     )
     try:
-        await bot.send_message(f"@{ADMIN_USERNAME}", admin_message)
+        if ADMIN_ID:
+            await bot.send_message(ADMIN_ID, admin_message)  # Отправка по chat_id
     except Exception as e:
         logging.error(f"Ошибка отправки данных админу: {e}")
     
